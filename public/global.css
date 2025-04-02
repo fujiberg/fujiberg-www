@@ -1,0 +1,52 @@
+@import url("https://fonts.googleapis.com/css2?family=Amita&family=Roboto&display=swap");
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: "Roboto", sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  background-image: url(./fujiberg.jpg);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+h1 {
+  font-family: "Amita", cursive;
+}
+
+main {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 20px;
+  border-radius: 20px;
+  position: absolute;
+  text-align: center;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+}
+
+.container {
+  flex: 1 0 auto;
+}
+
+footer {
+  flex-shrink: 0;
+  background-color: rgba(255, 255, 255, 0.5);
+  text-align: left;
+  font-size: small;
+  padding: 0 1rem;
+}
