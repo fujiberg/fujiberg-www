@@ -10,6 +10,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  GITOPS_REPO: bepost/infra # Replace with your GitOps repository
+  GITOPS_PATH: path/to/deployment.yaml # Path to your Kubernetes deployment file in the GitOps repo
 
 jobs:
   build:
@@ -48,8 +50,39 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Checkout GitOps repository
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v3
+        with:
+          repository: your-username/gitops-repo
+          path: gitops
+          token: ${{ secrets.GITOPS_PAT }} # Personal Access Token with repo access
+
+      - name: Update image tag in GitOps repository
+        if: github.event_name != 'pull_request'
+        run: |
+          # For versioned tags (from git tags)
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          # For main branch, use "latest" or a timestamp
+          elif [[ "${{ github.ref }}" == refs/heads/main ]]; then
+            VERSION=latest
+          fi
+
+          # Update the image reference in your Kubernetes manifests
+          cd gitops
+          sed -i "s|image: ghcr.io/${{ github.repository }}:.*|image: ghcr.io/${{ github.repository }}:${VERSION}|g" path/to/deployment.yaml
+
+          # Commit and push the change
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update image to $VERSION"
+          git push
